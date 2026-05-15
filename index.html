@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Institutional Intelligence Examination</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <header id="site-header">
+            <!-- Button will be moved here during exam -->
+        </header>
+
+        <main>
+            <!-- Welcome View -->
+            <div id="view-welcome" class="view active">
+
+                <div style="text-align: center; padding-top: 100px">
+                    <i>Discover your Cognitive Squirrel Profile<br><br><br></i>
+                    <div style="opacity: 0.8; margin-bottom: 20px">
+                        <p
+                            style="
+                                text-transform: uppercase;
+                                letter-spacing: 0.8em;
+                                font-size: 10px;
+                            "
+                        >
+                            Sciurid Mental Acuity Exam<br>
+
+                        </p>
+                    </div>
+
+                    <button id="action-btn" class="btn-action">
+                        Start Examination
+                    </button>
+
+                    <div style="opacity: 0.5; margin-bottom: 60px">
+                        <p
+                            style="
+                                text-transform: uppercase;
+                                letter-spacing: 0.2em;
+                                font-size: 10px;
+                            "
+                        ><br>
+                            Don't take this test too seriously!
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Examination View -->
+            <div id="view-exam" class="view">
+                <div id="questions-container" class="q-stack"></div>
+            </div>
+
+            <!-- Results View -->
+            <div id="view-results" class="view">
+                <div class="result-card">
+                    <div id="res-img" class="archetype-image"></div>
+                    <div class="result-content">
+                        <h2 id="res-archetype" class="archetype-title">
+                            Archetype
+                        </h2>
+                        <div id="res-dominant" class="dominant-label">
+                            Dominant Aspect
+                        </div>
+                        <p id="res-desc" class="archetype-desc"></p>
+                        <div id="res-axes" class="axes-display"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard">
+                    <!-- IQ Column -->
+                    <div class="dash-card iq-themed">
+                        <span id="res-iq-title" class="iq-title">Title</span>
+
+                        <div class="iq-mid-section">
+                            <div class="iq-score-column">
+                                <div class="iq-score-display">
+                                    <div id="res-iq-val" class="iq-value">100</div>
+                                    <div class="iq-label-sub">Intelligence<br>Quotient</div>
+                                </div>
+                                <div class="iq-percentile-label">
+                                    SD: 15.0 | <span id="res-percentile">50</span>th
+                                    Percentile
+                                </div>
+                            </div>
+                            <div id="res-iq-img" class="iq-threshold-image"></div>
+                        </div>
+
+                        <canvas id="bell-canvas" width="400" height="200"></canvas>
+                        <div class="iq-disclaimer">Results may not be accurate.</div>
+                    </div>
+
+                    <!-- Independent Variables Column -->
+                    <div class="dash-card">
+                        <span class="iq-title">Independent Variance</span>
+                        <canvas
+                            id="spider-canvas"
+                            width="400"
+                            height="350"
+                        ></canvas>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 80px">
+                    <button
+                        class="btn-action"
+                        style="
+                            background: transparent;
+                            color: #ccc;
+                            border: 1px solid #eee;
+                        "
+                        onclick="location.reload()"
+                    >
+                        Reset Session
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Custom Modal -->
+        <div id="modal-overlay" class="modal-overlay">
+            <div class="modal-content">
+                <p id="modal-message"></p>
+                <div class="modal-actions">
+                    <button id="modal-cancel" class="btn-secondary">Cancel</button>
+                    <button id="modal-confirm" class="btn-action">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="data.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>
