@@ -192,7 +192,7 @@ main {
     border: 1px solid var(--border);
     border-top: 4px solid var(--accent);
     border-radius: 8px;
-    margin-bottom: 24px;
+    margin-bottom: 16px; /* Reduced from 24px */
     padding: 0;
     text-align: center;
     box-shadow: 0 4px 20px rgba(0,0,0,0.03);
@@ -210,7 +210,7 @@ main {
 }
 
 .result-content {
-    padding: 32px 40px;
+    padding: 24px 32px; /* Reduced padding from 32px 40px */
 }
 
 .archetype-title {
@@ -229,7 +229,7 @@ main {
     text-transform: uppercase;
     letter-spacing: 0.3em;
     color: var(--text-secondary);
-    margin-bottom: 20px;
+    margin-bottom: 16px; /* Reduced from 20px */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -247,21 +247,21 @@ main {
 .axes-display {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px 40px;
-    margin-top: 32px;
-    padding-top: 24px;
+    gap: 12px 32px; /* Reduced gap from 16px 40px */
+    margin-top: 24px; /* Reduced from 32px */
+    padding-top: 20px; /* Reduced from 24px */
     border-top: 1px solid var(--border);
 }
 
 .axis-meter {
-    margin-bottom: 8px;
+    margin-bottom: 6px; /* Reduced from 8px */
 }
 
 .axis-label-group {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
+    margin-bottom: 4px; /* Reduced from 6px */
     width: 100%;
 }
 
@@ -311,15 +311,17 @@ main {
 .dashboard {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 16px; /* Reduced from 24px */
 }
 
 .dash-card {
     background: #fff;
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 24px;
+    padding: 20px; /* Reduced from 24px */
     box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    position: relative;
+    overflow: visible; /* Changed from default/hidden to ensure labels aren't clipped */
 }
 
 .dash-card.iq-themed {
@@ -328,6 +330,7 @@ main {
     border: none;
     box-shadow: 0 10px 40px rgba(30, 58, 138, 0.4);
     position: relative;
+    overflow: hidden; /* Keep hidden for the bell curve glow effects */
 }
 
 .dash-card.iq-themed .iq-title {
@@ -426,6 +429,8 @@ main {
 canvas {
     width: 100% !important;
     height: auto !important;
+    display: block;
+    margin: 0 auto;
 }
 
 @media (max-width: 850px) {

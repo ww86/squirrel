@@ -49,8 +49,8 @@ function showModal(message, onConfirm) {
 const createInputHTML = (q) => {
   if (q.type === "choice") {
     const maxLen = Math.max(...q.answers.map(a => a.label.length));
-    const gridClass = maxLen < 28 ? "choice-grid" : "";
-    
+    const gridClass = maxLen < 32 ? "choice-grid" : "";
+
     const optionsHTML = q.answers
       .map(
         (a, ai) => `
@@ -60,7 +60,7 @@ const createInputHTML = (q) => {
                     `,
       )
       .join("");
-    
+
     return `<div class="${gridClass}">${optionsHTML}</div>`;
   }
   if (q.type === "number") {
@@ -507,73 +507,71 @@ function drawSpider(indData) {
   const canvas = $("spider-canvas");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
-  const w = canvas.width;
-  const h = canvas.height;
+
+  const w = 400;
+  const h = 400;
+  canvas.width = w;
+  canvas.height = h;
+
+  // Perfectly centered now that the title is gone
   const center = { x: w / 2, y: h / 2 };
   const numVars = INDEPENDENT_VARS.length;
-  const maxRadius = Math.min(w, h) / 2 - 40; // Max radius, leaving space for labels
-  const dataRadius = maxRadius * 0.8; // Data points are within this radius
+  // Radius of 140 is a safe maximum for 400px width with labels
+  const maxRadius = 140; 
 
   ctx.clearRect(0, 0, w, h);
 
-  // Helper to get coordinates for a given value and angle
-  const getCoords = (value, angle, r = dataRadius) => ({
+  const getCoords = (value, angle, r = maxRadius) => ({
     x: center.x + Math.cos(angle) * r * value,
     y: center.y + Math.sin(angle) * r * value,
   });
 
-  // 1. Draw Concentric Circles (Background Web)
-  ctx.strokeStyle = "#eee";
-  ctx.lineWidth = 1;
-  const steps = 4; // 0, 25, 50, 75, 100%
-  for (let i = 1; i <= steps; i++) {
+  // 1. Draw Polygonal Background Web with soft fills
+  const steps = 4;
+  for (let j = steps; j >= 1; j--) {
     ctx.beginPath();
-    ctx.arc(center.x, center.y, (dataRadius / steps) * i, 0, Math.PI * 2);
+    const r = (maxRadius / steps) * j;
+    for (let i = 0; i < numVars; i++) {
+      const angle = ((Math.PI * 2) / numVars) * i - Math.PI / 2;
+      const pos = getCoords(1, angle, r);
+      if (i === 0) ctx.moveTo(pos.x, pos.y);
+      else ctx.lineTo(pos.x, pos.y);
+    }
+    ctx.closePath();
+
+    // Alternating subtle fills for a "target" look
+    if (j % 2 === 0) {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.015)";
+      ctx.fill();
+    }
+
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.lineWidth = 1;
     ctx.stroke();
   }
 
-  // 2. Draw Spokes and Numerical Labels
-  ctx.strokeStyle = "#e5e5e5";
-  ctx.lineWidth = 1;
-  ctx.fillStyle = "#888";
-  ctx.font = "7px SF Mono, monospace";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
+  // 2. Draw Spokes
+  ctx.beginPath();
+  ctx.strokeStyle = "rgba(0, 0, 0, 0.04)";
   for (let i = 0; i < numVars; i++) {
     const angle = ((Math.PI * 2) / numVars) * i - Math.PI / 2;
-    const end = getCoords(1, angle, dataRadius);
-
-    ctx.beginPath();
+    const end = getCoords(1, angle, maxRadius);
     ctx.moveTo(center.x, center.y);
     ctx.lineTo(end.x, end.y);
-    ctx.stroke();
-
-    // Numerical labels for the first spoke (top)
-    if (i === 0) {
-      for (let j = 1; j <= steps; j++) {
-        const value = (j / steps) * 100;
-        const labelCoords = getCoords(j / steps, angle, dataRadius);
-        ctx.fillText(value, labelCoords.x + 8, labelCoords.y);
-      }
-    }
   }
+  ctx.stroke();
 
-  // 3. Draw Data Path
+  // 3. Draw Data Path (with Glow and Gradient)
+  const deepBlue = "rgba(30, 58, 138, 0.8)";
+  const deepBlueFill = "rgba(30, 58, 138, 0.12)";
+
+  ctx.save();
   ctx.beginPath();
-  const dataFillGradient = ctx.createLinearGradient(0, 0, w, h);
-  dataFillGradient.addColorStop(0, "rgba(0, 0, 0, 0.03)");
-  dataFillGradient.addColorStop(1, "rgba(0, 0, 0, 0.08)");
-  ctx.fillStyle = dataFillGradient;
-  ctx.strokeStyle = "black";
-  ctx.lineWidth = 1.5;
-
   let firstPoint = true;
   INDEPENDENT_VARS.forEach((v, i) => {
     const angle = ((Math.PI * 2) / numVars) * i - Math.PI / 2;
-    const score = clamp(indData[v.id] || 0, 0, 100) / 100; // Normalized score
-    const { x, y } = getCoords(score, angle);
-
+    const score = clamp(indData[v.id] || 0, 0, 100) / 100;
+    const { x, y } = getCoords(score, angle, maxRadius);
     if (firstPoint) {
       ctx.moveTo(x, y);
       firstPoint = false;
@@ -582,29 +580,74 @@ function drawSpider(indData) {
     }
   });
   ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
 
-  // 4. Draw Data Point Markers
-  ctx.fillStyle = "black";
+  // Fill
+  ctx.fillStyle = deepBlueFill;
+  ctx.fill();
+
+  // Stroke with subtle glow
+  ctx.shadowBlur = 8;
+  ctx.shadowColor = "rgba(30, 58, 138, 0.3)";
+  ctx.strokeStyle = deepBlue;
+  ctx.lineWidth = 3;
+  ctx.lineJoin = "round";
+  ctx.stroke();
+  ctx.restore();
+
+  // 4. Draw Data Points (Enhanced)
   INDEPENDENT_VARS.forEach((v, i) => {
     const angle = ((Math.PI * 2) / numVars) * i - Math.PI / 2;
     const score = clamp(indData[v.id] || 0, 0, 100) / 100;
-    const { x, y } = getCoords(score, angle);
+    const { x, y } = getCoords(score, angle, maxRadius);
+
+    // Outer point glow
     ctx.beginPath();
-    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.strokeStyle = deepBlue;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Tiny inner dot
+    ctx.beginPath();
+    ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = deepBlue;
     ctx.fill();
   });
 
-  // 5. Draw Variable Labels
-  ctx.fillStyle = "var(--text-primary)";
-  ctx.font = "bold 11px Inter, sans-serif";
-  ctx.textAlign = "center";
+  // 5. Draw Labels (Refined)
+  ctx.textBaseline = "middle";
+
   INDEPENDENT_VARS.forEach((v, i) => {
     const angle = ((Math.PI * 2) / numVars) * i - Math.PI / 2;
-    const labelOffset = dataRadius + 25; // Offset from center
-    const x = center.x + Math.cos(angle) * labelOffset;
-    const y = center.y + Math.sin(angle) * labelOffset;
-    ctx.fillText(v.label.toUpperCase(), x, y);
+    const labelRadius = maxRadius + 20; 
+    const { x, y } = getCoords(1, angle, labelRadius);
+
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    if (Math.abs(cos) < 0.1) ctx.textAlign = "center";
+    else if (cos > 0) ctx.textAlign = "left";
+    else ctx.textAlign = "right";
+
+    // Adjust vertical offset for top/bottom labels
+    let vOffset = 0;
+    if (Math.abs(sin) > 0.8) vOffset = sin > 0 ? 8 : -8;
+
+    const label = v.label.toUpperCase();
+    const scoreValue = Math.round(indData[v.id] || 0);
+
+    // Main Label
+    ctx.font = "800 10px Inter, sans-serif";
+    ctx.fillStyle = "#111";
+    ctx.letterSpacing = "1px";
+    ctx.fillText(label, x, y + vOffset - 7);
+
+    // Score Label
+    ctx.font = "italic 700 11px SF Mono, monospace";
+    ctx.fillStyle = "#999";
+    ctx.fillText(scoreValue, x, y + vOffset + 8);
   });
 }
+
